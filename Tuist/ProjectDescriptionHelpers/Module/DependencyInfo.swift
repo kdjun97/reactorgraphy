@@ -13,13 +13,15 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
     moduleDependencies: [
         .App: [
             .Presentations(.Root),
+            .Presentations(.Base),
             .Data,
             .DI
         ],
         .Domain: [.DI],
         .Data: [.Domain],
         .DI: [.External(.Swinject)],
-        .Presentations(.Root): [.Presentations(.Base)],
+        .DesignSystem: [.External(.SnapKit)],
+        .Presentations(.Root): [.Presentations(.Home)],
         .Presentations(.Base): [
             .Domain,
             .DesignSystem,
@@ -27,6 +29,10 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .External(.RxSwift),
             .External(.RxCocoa),
             .External(.RxRelay),
+            .External(.SnapKit)
+        ],
+        .Presentations(.Home): [
+            .Presentations(.Base)
         ]
     ]
 )

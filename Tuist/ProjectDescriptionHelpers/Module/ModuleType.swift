@@ -21,9 +21,11 @@ public enum ExternalModuleType: String {
     case RxSwift
     case RxCocoa
     case RxRelay
+    case SnapKit
 }
 
 public enum PresentationModuleType: String {
     case Root
     case Base
+    case Home
 }

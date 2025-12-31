@@ -22,5 +22,5 @@ public let projectEnvironment = ProjectEnvironment(
     organizationName: "jumy",
     bundleIdentifier: "com.jumy.reactorgraphy",
     deploymentTargets: .iOS("16.0"),
-    destination: .iOS
+    destination: [.iPhone]
 )
