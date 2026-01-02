@@ -7,6 +7,7 @@
 
 import UIKit
 import SnapKit
+import DesignSystem
 
 class DemoViewController: UIViewController {
     let label: UILabel = {
@@ -14,6 +15,8 @@ class DemoViewController: UIViewController {
         label.text = "Hello World"
         return label
     }()
+    
+    private let navigationBar = RNavigationBar(style: .logo)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,9 +32,16 @@ extension DemoViewController {
     
     func setupLayout() {
         view.addSubview(label)
+        view.addSubview(navigationBar)
+        
+        navigationBar.snp.makeConstraints {
+            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            $0.leading.trailing.equalToSuperview()
+        }
         
         label.snp.makeConstraints {
-            $0.center.equalToSuperview()
+            $0.centerX.equalToSuperview()
+            $0.top.equalTo(navigationBar.snp.bottom)
         }
     }
 }
