@@ -28,4 +28,5 @@ public enum PresentationModuleType: String {
     case Root
     case Base
     case Home
+    case RandomPhoto
 }
