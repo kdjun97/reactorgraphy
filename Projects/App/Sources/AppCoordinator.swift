@@ -30,7 +30,7 @@ private extension AppCoordinator {
         self.rootCoordinator = coordinator
         addChild(coordinator)
         
-        window.rootViewController = coordinator.navigationController
+        window.rootViewController = coordinator.tabBarController
         coordinator.start()
     }
 }

@@ -9,10 +9,10 @@ import Base
 import UIKit
 
 public final class HomeCoordinator: BaseCoordinator {
-    private let navigationController: BaseNavigationController
+    public let navigationController: BaseNavigationController
     
-    public init(navigationController: BaseNavigationController) {
-        self.navigationController = navigationController
+    public override init() {
+        self.navigationController = BaseNavigationController()
         super.init()
         print("⭕ HomeCoordinator init!")
     }

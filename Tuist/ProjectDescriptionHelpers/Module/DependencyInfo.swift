@@ -21,7 +21,7 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
         .Data: [.Domain],
         .DI: [.External(.Swinject)],
         .DesignSystem: [.External(.SnapKit)],
-        .Presentations(.Root): [.Presentations(.Home)],
+        .Presentations(.Root): [.Presentations(.Home), .Presentations(.RandomPhoto)],
         .Presentations(.Base): [
             .Domain,
             .DesignSystem,
@@ -32,6 +32,9 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .External(.SnapKit)
         ],
         .Presentations(.Home): [
+            .Presentations(.Base)
+        ],
+        .Presentations(.RandomPhoto): [
             .Presentations(.Base)
         ]
     ]
