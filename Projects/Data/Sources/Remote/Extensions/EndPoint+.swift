@@ -8,7 +8,7 @@
 import Foundation
 
 extension EndPoint {
-    func makeURLRequest(url: URL) -> URLRequest {
+    func makeURLRequest(url: URL, accessToken: String) -> URLRequest {
         var urlRequest = URLRequest(url: url)
         urlRequest.timeoutInterval = 30
         urlRequest.httpMethod = self.method.rawValue
@@ -18,8 +18,8 @@ extension EndPoint {
             }
         }
         
-        let tokenString: String = ""
-        
+        let tokenString: String = accessToken.isEmpty ? "" : "Client-ID \(accessToken)"
+
         urlRequest.setValue(tokenString, forHTTPHeaderField: "Authorization")
         urlRequest.setValue("UTF-8", forHTTPHeaderField: "Accept-Charset")
         urlRequest.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")

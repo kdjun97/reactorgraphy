@@ -9,7 +9,11 @@ import Foundation
 import Domain
 
 public final class ApiService {
-    public init() {}
+    let tokenProvider: TokenProvider
+    
+    public init(tokenProvider: TokenProvider) {
+        self.tokenProvider = tokenProvider
+    }
     
     func call<T: Decodable>(_ endPoint: EndPoint<T>, retryCount: Int = 1) async throws -> T {
         do {

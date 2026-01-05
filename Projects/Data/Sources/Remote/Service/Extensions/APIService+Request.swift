@@ -10,7 +10,10 @@ import Foundation
 extension ApiService {
     func makeRequest<T>(_ endPoint: EndPoint<T>) throws -> URLRequest {
         let url = try makeURL(endPoint)
-        var request = endPoint.makeURLRequest(url: url)
+        var request = endPoint.makeURLRequest(
+            url: url,
+            accessToken: tokenProvider.getAccessToken()
+        )
 
         if let body = endPoint.requestBody {
             guard let httpBody = try? JSONEncoder().encode(body) else {
