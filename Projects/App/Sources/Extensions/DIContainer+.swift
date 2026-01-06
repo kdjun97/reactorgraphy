@@ -15,6 +15,7 @@ extension DIContainer {
         registerApiServiceDependency()
         
         registerKeyChainStorageDependency()
+        registerKeyChainUseCase()
     }
 }
 
@@ -32,8 +33,7 @@ private extension DIContainer {
     
     func registerApiServiceDependency() {
         container.register(ApiService.self) { resolver in
-            let tokenProvider: TokenProvider = resolver.resolve()
-            return ApiService(tokenProvider: tokenProvider)
+            return ApiService(tokenProvider: resolver.resolve())
         }
     }
 }
@@ -41,8 +41,13 @@ private extension DIContainer {
 private extension DIContainer {
     func registerKeyChainStorageDependency() {
         container.register(KeyChainRepositoryProtocol.self) { resolver in
-            let keyChainStorage: KeyChainStorage = resolver.resolve()
-            return KeyChainRepository(keyChainStorage: keyChainStorage)
+            return KeyChainRepository(keyChainStorage: resolver.resolve())
+        }
+    }
+    
+    func registerKeyChainUseCase() {
+        container.register(KeyChainUseCase.self) { resolver in
+            return KeyChainUseCase(repositoryProtocol: resolver.resolve())
         }
     }
 }
