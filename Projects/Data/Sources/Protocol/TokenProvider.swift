@@ -8,6 +8,4 @@
 public protocol TokenProvider {
     func getAccessToken() -> String
     func setAccessToken(_ accessToken: String)
-    func getRefreshToken() -> String
-    func setRefreshToken(_ refreshToken: String)
 }

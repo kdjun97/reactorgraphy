@@ -26,12 +26,4 @@ public struct KeyChainRepository: KeyChainRespotiroyProtocol {
             return false
         }
     }
-    
-    public func getSignUpCompleted() -> Bool {
-        return (try? keyChainStorage.read(key: KeyChainStorageKeys.SIGN_UP_COMPLETED, type: Bool.self)) ?? false
-    }
-    
-    public func setSignUpCompleted(_ value: Bool) {
-        try? keyChainStorage.save(key: KeyChainStorageKeys.SIGN_UP_COMPLETED, value: value)
-    }
 }
