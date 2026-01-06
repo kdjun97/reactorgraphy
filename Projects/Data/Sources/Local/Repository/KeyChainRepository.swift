@@ -7,7 +7,7 @@
 
 import Domain
 
-public struct KeyChainRepository: KeyChainRespotiroyProtocol {
+public struct KeyChainRepository: KeyChainRepositoryProtocol {
     private let keyChainStorage: KeyChainStorage
     
     public init(keyChainStorage: KeyChainStorage) {
