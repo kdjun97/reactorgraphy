@@ -35,7 +35,8 @@ public let dependencyInfo: DependencyInfo = DependencyInfo(
             .Presentations(.Base)
         ],
         .Presentations(.RandomPhoto): [
-            .Presentations(.Base)
+            .Presentations(.Base),
+            .External(.Kingfisher)
         ]
     ]
 )
