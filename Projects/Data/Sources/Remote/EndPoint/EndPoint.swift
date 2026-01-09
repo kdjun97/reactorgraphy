@@ -26,3 +26,9 @@ struct EndPoint<T>: EndPointProtocol {
         self.requestBody = requestBody
     }
 }
+
+extension EndPoint {
+    static func getRandomPhoto() -> EndPoint<T> {
+        return EndPoint(path: .randomPhoto, method: .GET)
+    }
+}

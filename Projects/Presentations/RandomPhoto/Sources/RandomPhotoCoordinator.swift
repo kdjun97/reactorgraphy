@@ -7,6 +7,9 @@
 
 import Base
 import UIKit
+import ReactorKit
+import Domain
+import DI
 
 public final class RandomPhotoCoordinator: BaseCoordinator {
     public let navigationController: BaseNavigationController
@@ -22,7 +25,13 @@ public final class RandomPhotoCoordinator: BaseCoordinator {
     }
     
     public override func start() {
-        let randomPhotoViewController = RandomPhotoViewController()
-        navigationController.viewControllers = [randomPhotoViewController]
+        let keyChainUseCase: KeyChainUseCase = DIContainer.shared.resolve()
+        let photoUseCase: PhotoUseCase = DIContainer.shared.resolve()
+        let reactor = RandomPhotoReactor(
+            keyChainUseCase: keyChainUseCase,
+            photoUseCase: photoUseCase
+        )
+        let viewController = RandomPhotoViewController(reactor: reactor)
+        navigationController.viewControllers = [viewController]
     }
 }
