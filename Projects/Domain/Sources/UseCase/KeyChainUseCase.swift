@@ -11,4 +11,12 @@ public struct KeyChainUseCase {
     public init(repositoryProtocol: KeyChainRepositoryProtocol) {
         self.repositoryProtocol = repositoryProtocol
     }
+    
+    public func setAccessToken(_ accessToken: String) -> Bool {
+        repositoryProtocol.setAccessToken(accessToken)
+    }
+    
+    public func getAccessToken() -> String? {
+        return repositoryProtocol.getAccessToken()
+    }
 }
