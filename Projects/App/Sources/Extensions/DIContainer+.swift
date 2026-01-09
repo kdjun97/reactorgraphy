@@ -35,6 +35,14 @@ private extension DIContainer {
         container.register(ApiService.self) { resolver in
             return ApiService(tokenProvider: resolver.resolve())
         }
+        
+        container.register(PhotoRepositoryProtocol.self) { resolver in
+            return PhotoRepository(apiService: resolver.resolve())
+        }
+        
+        container.register(PhotoUseCase.self) { resolver in
+            return PhotoUseCase(repositoryProtocol: resolver.resolve())
+        }
     }
 }
 
