@@ -26,7 +26,11 @@ public final class RandomPhotoCoordinator: BaseCoordinator {
     
     public override func start() {
         let keyChainUseCase: KeyChainUseCase = DIContainer.shared.resolve()
-        let reactor = RandomPhotoReactor(keyChainUseCase: keyChainUseCase)
+        let photoUseCase: PhotoUseCase = DIContainer.shared.resolve()
+        let reactor = RandomPhotoReactor(
+            keyChainUseCase: keyChainUseCase,
+            photoUseCase: photoUseCase
+        )
         let viewController = RandomPhotoViewController(reactor: reactor)
         navigationController.viewControllers = [viewController]
     }

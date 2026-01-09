@@ -37,7 +37,7 @@ final class RandomPhotoViewController: UIViewController, View {
         super.viewDidLoad()
         setupUI()
         setupLayout()
-        reactor?.action.onNext(.onAppear)
+        reactor?.action.onNext(.viewDidLoad)
         collectionView.delegate = self
     }
     
@@ -69,6 +69,13 @@ final class RandomPhotoViewController: UIViewController, View {
                 )
             })
             .disposed(by: disposeBag)
+        
+        collectionView.currentIndexRelay
+            .debounce(.milliseconds(200), scheduler: MainScheduler.instance)
+            .distinctUntilChanged()
+            .map { RandomPhotoReactor.Action.indexChanged($0) }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
     }
 }
 
@@ -85,6 +92,7 @@ private extension RandomPhotoViewController {
             
             // Closure로 액션 컨트롤 하는 방법 연습
             cell.configure(
+                imageURL: item.photo?.urls.small,
                 onCancel: {
                     reactor.action.onNext(.cancelButtonTapped(item.uuid))
                 }

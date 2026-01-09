@@ -8,6 +8,7 @@
 import UIKit
 import DesignSystem
 import RxSwift
+import Kingfisher
 
 final class RandomPhotoCell: UICollectionViewCell {
     static let reuseID = "RandomPhotoCellID"
@@ -30,6 +31,9 @@ final class RandomPhotoCell: UICollectionViewCell {
         super.prepareForReuse()
         buttonContainer.didTapCancelButton = nil
         disposeBag = DisposeBag()
+        
+        photoImageView.kf.cancelDownloadTask()
+        photoImageView.image = nil
     }
     
     private let photoView: UIView = {
@@ -39,6 +43,7 @@ final class RandomPhotoCell: UICollectionViewCell {
         return view
     }()
     
+    let photoImageView: UIImageView = UIImageView()
     let buttonContainer = RandomPhotoBottomStackView()
 }
 
@@ -56,6 +61,7 @@ private extension RandomPhotoCell {
         contentView.layer.borderColor = RColors.gray30.color.cgColor
         
         photoView.layer.cornerRadius = 12
+        photoView.clipsToBounds = true
     }
     
     func setupLayout() {
@@ -66,6 +72,11 @@ private extension RandomPhotoCell {
             $0.leading.equalToSuperview().offset(12)
             $0.trailing.equalToSuperview().offset(-12)
             $0.height.equalTo(421)
+        }
+        
+        photoView.addSubview(photoImageView)
+        photoImageView.snp.makeConstraints {
+            $0.edges.equalTo(photoView)
         }
         
         contentView.addSubview(buttonContainer)
@@ -80,8 +91,44 @@ private extension RandomPhotoCell {
 
 extension RandomPhotoCell {
     func configure(
+        imageURL: String?,
         onCancel: @escaping () -> Void
     ) {
         buttonContainer.didTapCancelButton = onCancel
+        guard let imageURL = imageURL,
+              let url = URL(string: imageURL) else { return }
+        
+        configurePhotoImageView(url: url)
+    }
+    
+    func configurePhotoImageView(url: URL) {
+        photoImageView.kf.indicatorType = .activity
+        if let indicator = photoImageView.kf.indicator?.view as? UIActivityIndicatorView {
+            indicator.color = .white
+            indicator.style = .medium
+        }
+        photoImageView.contentMode = .scaleAspectFit
+        photoImageView.clipsToBounds = true
+        
+        let processor = DownsamplingImageProcessor(
+            size: CGSize(width: photoView.bounds.width, height: 421)
+        )
+        
+        photoImageView.kf.setImage(
+            with: url,
+            options: [
+                .processor(processor),
+                .transition(.fade(0.3)),
+                .scaleFactor(UIScreen.main.scale),
+                .cacheSerializer(FormatIndicatedCacheSerializer.jpeg)
+            ]
+        ) { result in
+            switch result {
+            case .success(let value):
+                print("Task done for: \(value.source.url?.lastPathComponent ?? "")")
+            case .failure(let error):
+                print("Job failed: \(error.localizedDescription)")
+            }
+        }
     }
 }

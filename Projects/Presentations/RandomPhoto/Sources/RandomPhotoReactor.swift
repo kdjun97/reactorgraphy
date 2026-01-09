@@ -11,6 +11,7 @@ import Foundation
 
 final class RandomPhotoReactor: Reactor {
     private let keyChainUseCase: KeyChainUseCase
+    private let photoUseCase: PhotoUseCase
     
     struct State {
         var items: [RandomPhotoItem] = []
@@ -21,18 +22,24 @@ final class RandomPhotoReactor: Reactor {
         case setItems([RandomPhotoItem])
         case appendItem
         case setIndex(Int)
+        case setPhotoModelToIndex(PhotosModel, Int)
     }
     
     enum Action {
-        case onAppear
+        case viewDidLoad
         case cancelButtonTapped(UUID)
         case bookmarkButtonTapped(UUID)
         case infoButtonTapped(UUID)
         case appendDummyCard
+        case indexChanged(Int)
     }
     
-    init(keyChainUseCase: KeyChainUseCase) {
+    init(
+        keyChainUseCase: KeyChainUseCase,
+        photoUseCase: PhotoUseCase
+    ) {
         self.keyChainUseCase = keyChainUseCase
+        self.photoUseCase = photoUseCase
         print("⭕ RandomPhotoReactor init!")
     }
     
@@ -44,9 +51,12 @@ final class RandomPhotoReactor: Reactor {
         
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
-        case .onAppear:
+        case .viewDidLoad:
             let items = (0..<2).map { _ in RandomPhotoItem() }
-            return .just(.setItems(items))
+            return .concat([
+                .just(.setItems(items)),
+                fetchRandomPhotoStream(index: 0)
+            ])
         case .cancelButtonTapped(let uuid):
             print("cancel button tapped! \(uuid)")
             return .empty()
@@ -65,10 +75,18 @@ final class RandomPhotoReactor: Reactor {
             
             return .empty()
         case .infoButtonTapped(let uuid):
-            print("info button button tapped! \(uuid)")
+            // TODO: Detail FullScreen Cover
             return .empty()
         case .appendDummyCard:
             return .just(.appendItem)
+        case .indexChanged(let index):
+            guard index < currentState.items.count else { return .empty() }
+            
+            let photoModel = currentState.items[index]
+            guard let _ = photoModel.photo else {
+                return fetchRandomPhotoStream(index: index)
+            }
+            return .empty()
         }
     }
     
@@ -84,6 +102,33 @@ final class RandomPhotoReactor: Reactor {
         case .setIndex(let value):
             newState.scrollToIndex = value
             return newState
+        case let .setPhotoModelToIndex(model, index):
+            guard let _ = currentState.items[index].photo else {
+                newState.items[index].photo = model
+                return newState
+            }
+            
+            return state
+        }
+    }
+}
+
+private extension RandomPhotoReactor {
+    func fetchRandomPhotoStream(index: Int) -> Observable<Mutation> {
+        return Observable.create { [weak self] observer in
+            let task = Task {
+                guard let self = self else { return }
+                let result = await self.photoUseCase.getRandomPhoto()
+                
+                switch result {
+                case .success(let model):
+                    observer.onNext(.setPhotoModelToIndex(model, index))
+                case .failure(let error):
+                    observer.onError(error)
+                }
+                observer.onCompleted()
+            }
+            return Disposables.create { task.cancel() }
         }
     }
 }
