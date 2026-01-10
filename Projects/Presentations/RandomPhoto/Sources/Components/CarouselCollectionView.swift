@@ -16,7 +16,7 @@ final class CarouselCollectionView: UICollectionView {
     
     init() {
         super.init(frame: .zero, collectionViewLayout: UICollectionViewLayout())
-        collectionViewLayout = makeFlowLayout()
+        collectionViewLayout = makeLayout()
         setupUI()
         registerCell()
     }
@@ -44,7 +44,7 @@ private extension CarouselCollectionView {
 }
 
 private extension CarouselCollectionView {
-    func makeFlowLayout() -> UICollectionViewLayout {
+    func makeLayout() -> UICollectionViewLayout {
         let itemSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
             heightDimension: .fractionalHeight(1.0)
