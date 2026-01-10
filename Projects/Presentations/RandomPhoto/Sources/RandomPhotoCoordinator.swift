@@ -13,9 +13,15 @@ import DI
 
 public final class RandomPhotoCoordinator: BaseCoordinator {
     public let navigationController: BaseNavigationController
+    public let reactor: RandomPhotoReactor
     
     public override init() {
         self.navigationController = BaseNavigationController()
+        reactor = RandomPhotoReactor(
+            keyChainUseCase: DIContainer.shared.resolve(),
+            photoUseCase: DIContainer.shared.resolve()
+        )
+
         super.init()
         print("⭕ RandomPhotoCoordinator init!")
     }
@@ -25,12 +31,6 @@ public final class RandomPhotoCoordinator: BaseCoordinator {
     }
     
     public override func start() {
-        let keyChainUseCase: KeyChainUseCase = DIContainer.shared.resolve()
-        let photoUseCase: PhotoUseCase = DIContainer.shared.resolve()
-        let reactor = RandomPhotoReactor(
-            keyChainUseCase: keyChainUseCase,
-            photoUseCase: photoUseCase
-        )
         let viewController = RandomPhotoViewController(reactor: reactor)
         navigationController.viewControllers = [viewController]
     }

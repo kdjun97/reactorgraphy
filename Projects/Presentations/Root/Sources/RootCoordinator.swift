@@ -9,9 +9,13 @@ import Base
 import Home
 import UIKit
 import RandomPhoto
+import RxSwift
+import PhotoDetail
+import Domain
 
 public final class RootCoordinator: BaseCoordinator {
     public let tabBarController: UITabBarController
+    private var disposeBag = DisposeBag()
     
     public override init() {
         self.tabBarController = UITabBarController()
@@ -46,10 +50,21 @@ private extension RootCoordinator {
         addChild(randomPhotoCoordinator)
         randomPhotoCoordinator.start()
         
+        randomPhotoCoordinator.reactor.routeRelay
+            .subscribe(onNext: { [weak self] route in
+                guard let self = self else { return }
+                switch route {
+                case .photoDetail(let model):
+                    self.showPhotoDetail(model: model)
+                }
+            })
+            .disposed(by: disposeBag)
+        
         setupTabBarItem(
             homeCoordinator: homeCoordinator,
             randomPhotoCoordinator: randomPhotoCoordinator
         )
+        
         tabBarController.setViewControllers(
             [homeCoordinator.navigationController, randomPhotoCoordinator.navigationController],
             animated: false
@@ -65,5 +80,25 @@ private extension RootCoordinator {
 
         homeCoordinator.navigationController.tabBarItem = homeItem
         randomPhotoCoordinator.navigationController.tabBarItem = randomPhotoItem
+    }
+}
+
+private extension RootCoordinator {
+    func showPhotoDetail(model: PhotosModel) {
+        let coordinator = PhotoDetailCoordinator(model: model)
+        addChild(coordinator)
+        coordinator.start(presenter: tabBarController)
+        
+        coordinator.reactor.routeRelay
+            .subscribe(onNext: { [weak self, weak coordinator] route in
+                guard let self = self,
+                      let coordinator = coordinator else { return }
+                switch route {
+                case .dismiss:
+                    self.tabBarController.dismiss(animated: true)
+                    self.removeChild(coordinator)
+                }
+            })
+            .disposed(by: disposeBag)
     }
 }

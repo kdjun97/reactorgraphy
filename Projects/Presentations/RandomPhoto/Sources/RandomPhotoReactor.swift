@@ -8,28 +8,35 @@
 import ReactorKit
 import Domain
 import Foundation
+import RxRelay
 
-final class RandomPhotoReactor: Reactor {
+public final class RandomPhotoReactor: Reactor {
     private let keyChainUseCase: KeyChainUseCase
     private let photoUseCase: PhotoUseCase
-    
-    struct State {
+    public let initialState: State = .init()
+    public var routeRelay = PublishRelay<Route>()
+
+    public struct State {
         var items: [RandomPhotoItem] = []
         @Pulse var scrollToIndex: Int?
     }
     
-    enum Mutation {
+    public enum Route {
+        case photoDetail(PhotosModel)
+    }
+    
+    public enum Mutation {
         case setItems([RandomPhotoItem])
         case appendItem
         case setIndex(Int)
         case setPhotoModelToIndex(PhotosModel, Int)
     }
     
-    enum Action {
+    public enum Action {
         case viewDidLoad
         case cancelButtonTapped(UUID)
         case bookmarkButtonTapped(UUID)
-        case infoButtonTapped(UUID)
+        case infoButtonTapped(PhotosModel?)
         case appendDummyCard
         case indexChanged(Int)
     }
@@ -47,16 +54,11 @@ final class RandomPhotoReactor: Reactor {
         print("❎ RandomPhotoReactor deinit!")
     }
     
-    let initialState: State = .init()
-        
-    func mutate(action: Action) -> Observable<Mutation> {
+    public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .viewDidLoad:
             let items = (0..<2).map { _ in RandomPhotoItem() }
-            return .concat([
-                .just(.setItems(items)),
-                fetchRandomPhotoStream(index: 0)
-            ])
+            return .just(.setItems(items))
         case .cancelButtonTapped(let uuid):
             print("cancel button tapped! \(uuid)")
             return .empty()
@@ -74,8 +76,9 @@ final class RandomPhotoReactor: Reactor {
             }
             
             return .empty()
-        case .infoButtonTapped(let uuid):
-            // TODO: Detail FullScreen Cover
+        case .infoButtonTapped(let model):
+            guard let model = model else { return .empty() }
+            routeRelay.accept(.photoDetail(model))
             return .empty()
         case .appendDummyCard:
             return .just(.appendItem)
@@ -90,7 +93,7 @@ final class RandomPhotoReactor: Reactor {
         }
     }
     
-    func reduce(state: State, mutation: Mutation) -> State {
+    public func reduce(state: State, mutation: Mutation) -> State {
         var newState = state
         switch mutation {
         case .setItems(let items):
