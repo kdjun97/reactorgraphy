@@ -104,7 +104,7 @@ private extension RandomPhotoViewController {
                 .disposed(by: cell.disposeBag)
             
             cell.buttonContainer.infoButton.rx.tap // ReactorKit 방식으로 depth까지 들어가서 액션 컨트롤 하는 방법 연습
-                .map { RandomPhotoReactor.Action.infoButtonTapped(item.uuid) }
+                .map { RandomPhotoReactor.Action.infoButtonTapped(item.photo) }
                 .bind(to: reactor.action)
                 .disposed(by: cell.disposeBag)
             return cell

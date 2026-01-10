@@ -9,9 +9,13 @@ import Base
 import Home
 import UIKit
 import RandomPhoto
+import RxSwift
+import PhotoDetail
+import Domain
 
 public final class RootCoordinator: BaseCoordinator {
     public let tabBarController: UITabBarController
+    private var disposeBag = DisposeBag()
     
     public override init() {
         self.tabBarController = UITabBarController()
@@ -46,10 +50,20 @@ private extension RootCoordinator {
         addChild(randomPhotoCoordinator)
         randomPhotoCoordinator.start()
         
+        randomPhotoCoordinator.reactor.routeRelay
+            .subscribe(onNext: { [weak self] route in
+                guard let self = self else { return }
+                switch route {
+                case .photoDetail(let model):
+                }
+            })
+            .disposed(by: disposeBag)
+        
         setupTabBarItem(
             homeCoordinator: homeCoordinator,
             randomPhotoCoordinator: randomPhotoCoordinator
         )
+        
         tabBarController.setViewControllers(
             [homeCoordinator.navigationController, randomPhotoCoordinator.navigationController],
             animated: false
@@ -67,3 +81,4 @@ private extension RootCoordinator {
         randomPhotoCoordinator.navigationController.tabBarItem = randomPhotoItem
     }
 }
+
