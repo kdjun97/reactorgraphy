@@ -29,6 +29,11 @@ final class PhotoDetailViewController: UIViewController, View {
     
     private lazy var navigationBar = DetailNavigationBar(userName: reactor?.currentState.model.username ?? "-")
     
+    private lazy var detailBottomInfoView = DetailBottomInfoView(
+        titleText: reactor?.currentState.model.id ?? "-",
+        descriptionText: reactor?.currentState.model.description ?? "-"
+    )
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -65,6 +70,14 @@ private extension PhotoDetailViewController {
         navigationBar.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview().inset(16)
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+        }
+        
+        view.addSubview(detailBottomInfoView)
+        
+        detailBottomInfoView.snp.makeConstraints {
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
+            $0.trailing.equalToSuperview()
+            $0.leading.equalToSuperview()
         }
     }
 }
