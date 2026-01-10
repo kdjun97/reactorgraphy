@@ -12,9 +12,11 @@ import Domain
 public final class PhotoDetailCoordinator: BaseCoordinator {
     private let model: PhotosModel
     private weak var presenter: UIViewController?
+    public let reactor: PhotoDetailReactor
     
     public init(model: PhotosModel) {
         self.model = model
+        self.reactor = PhotoDetailReactor(model: model)
         super.init()
         print("⭕ PhotoDetailCoordinator init!")
     }
@@ -25,7 +27,6 @@ public final class PhotoDetailCoordinator: BaseCoordinator {
     
     public func start(presenter: UIViewController) {
         self.presenter = presenter
-        let reactor = PhotoDetailReactor(model: model)
         let viewController = PhotoDetailViewController(reactor: reactor)
         viewController.modalPresentationStyle = .overFullScreen
         

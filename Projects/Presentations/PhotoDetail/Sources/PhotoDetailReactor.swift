@@ -7,9 +7,13 @@
 
 import ReactorKit
 import Domain
+import RxRelay
 
-final class PhotoDetailReactor: Reactor {
-    init(model: PhotosModel) {
+final public class PhotoDetailReactor: Reactor {
+    public let initialState: State
+    public var routeRelay = PublishRelay<Route>()
+    
+    public init(model: PhotosModel) {
         self.initialState = State(model: model)
         print("⭕ PhotoDetailReactor init!")
     }
@@ -18,28 +22,46 @@ final class PhotoDetailReactor: Reactor {
         print("❎ PhotoDetailReactor deinit!")
     }
     
-    let initialState: State
     
-    struct State {
+    public struct State {
         let model: PhotosModel
+        var isBookmarked: Bool = false
     }
     
-    enum Action {
+    public enum Action {
         case viewDidLoad
+        case cancelButtonTapped
+        case bookmarkButtonTapped
     }
     
-    enum Mutation {
-        
+    public enum Mutation {
+        case setBookmark(Bool)
     }
     
-    func mutate(action: Action) -> Observable<Mutation> {
+    public enum Route {
+        case dismiss
+    }
+    
+    public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .viewDidLoad:
             return .empty()
+        case .cancelButtonTapped:
+            routeRelay.accept(.dismiss)
+            return .empty()
+        case .bookmarkButtonTapped:
+            var value: Bool = currentState.isBookmarked
+            value.toggle()
+            return .just(.setBookmark(value))
         }
     }
     
-    func reduce(state: State, mutation: Mutation) -> State {
-        return state
+    public func reduce(state: State, mutation: Mutation) -> State {
+        var newState = state
+        switch mutation {
+        case .setBookmark(let isBookmarked):
+            newState.isBookmarked = isBookmarked
+            return newState
+        }
     }
 }

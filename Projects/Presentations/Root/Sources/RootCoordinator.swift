@@ -89,6 +89,16 @@ private extension RootCoordinator {
         addChild(coordinator)
         coordinator.start(presenter: tabBarController)
         
-        // TODO: 화면 나갈 때, coordinator 메모리 정리 필요
+        coordinator.reactor.routeRelay
+            .subscribe(onNext: { [weak self, weak coordinator] route in
+                guard let self = self,
+                      let coordinator = coordinator else { return }
+                switch route {
+                case .dismiss:
+                    self.tabBarController.dismiss(animated: true)
+                    self.removeChild(coordinator)
+                }
+            })
+            .disposed(by: disposeBag)
     }
 }

@@ -8,6 +8,7 @@
 import UIKit
 import SnapKit
 import ReactorKit
+import RxCocoa
 
 final class PhotoDetailViewController: UIViewController, View {
     var disposeBag = DisposeBag()
@@ -26,11 +27,7 @@ final class PhotoDetailViewController: UIViewController, View {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private let label: UILabel = {
-        let label = UILabel()
-        label.text = "Hello~"
-        return label
-    }()
+    private lazy var navigationBar = DetailNavigationBar(userName: reactor?.currentState.model.username ?? "-")
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,7 +36,21 @@ final class PhotoDetailViewController: UIViewController, View {
     }
 
     func bind(reactor: PhotoDetailReactor) {
+        navigationBar.cancelButton.rx.tap
+            .map { PhotoDetailReactor.Action.cancelButtonTapped }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
         
+        navigationBar.bookmarkButton.rx.tap
+            .map { PhotoDetailReactor.Action.bookmarkButtonTapped }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.isBookmarked }
+            .distinctUntilChanged()
+            .bind(to: navigationBar.bookmarkButton.rx.isSelected)
+            .disposed(by: disposeBag)
     }
 }
 
@@ -49,11 +60,11 @@ private extension PhotoDetailViewController {
     }
     
     func setupLayout() {
-        view.addSubview(label)
+        view.addSubview(navigationBar)
         
-        label.snp.makeConstraints {
-            $0.center.equalToSuperview()
+        navigationBar.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
         }
     }
-
 }
