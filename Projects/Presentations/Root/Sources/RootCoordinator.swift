@@ -55,6 +55,7 @@ private extension RootCoordinator {
                 guard let self = self else { return }
                 switch route {
                 case .photoDetail(let model):
+                    self.showPhotoDetail(model: model)
                 }
             })
             .disposed(by: disposeBag)
@@ -82,3 +83,12 @@ private extension RootCoordinator {
     }
 }
 
+private extension RootCoordinator {
+    func showPhotoDetail(model: PhotosModel) {
+        let coordinator = PhotoDetailCoordinator(model: model)
+        addChild(coordinator)
+        coordinator.start(presenter: tabBarController)
+        
+        // TODO: 화면 나갈 때, coordinator 메모리 정리 필요
+    }
+}
