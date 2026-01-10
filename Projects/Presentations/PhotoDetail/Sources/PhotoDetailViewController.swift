@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 import ReactorKit
 import RxCocoa
+import Kingfisher
 
 final class PhotoDetailViewController: UIViewController, View {
     var disposeBag = DisposeBag()
@@ -34,6 +35,9 @@ final class PhotoDetailViewController: UIViewController, View {
         descriptionText: reactor?.currentState.model.description ?? "-"
     )
     
+    private let photoImageView: UIImageView = UIImageView()
+    private var aspectRatioConstraint: NSLayoutConstraint?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -62,6 +66,10 @@ final class PhotoDetailViewController: UIViewController, View {
 private extension PhotoDetailViewController {
     func setupUI() {
         view.backgroundColor = UIColor.black.withAlphaComponent(0.9)
+        
+        if let url = URL(string: reactor?.currentState.model.urls.small ?? "") {
+            configurePhotoImageView(url: url)
+        }
     }
     
     func setupLayout() {
@@ -79,5 +87,51 @@ private extension PhotoDetailViewController {
             $0.trailing.equalToSuperview()
             $0.leading.equalToSuperview()
         }
+        
+        let photoContainerView = UIView()
+        view.addSubview(photoContainerView)
+        photoContainerView.addSubview(photoImageView)
+        
+        photoContainerView.snp.makeConstraints {
+            $0.top.equalTo(navigationBar.snp.bottom).offset(12)
+            $0.bottom.equalTo(detailBottomInfoView.snp.top).offset(-12)
+            $0.leading.equalToSuperview().offset(12)
+            $0.trailing.equalToSuperview().offset(-12)
+        }
+        
+        photoImageView.snp.makeConstraints {
+            $0.centerY.equalToSuperview()
+            $0.leading.equalToSuperview()
+            $0.trailing.equalToSuperview()
+        }
+    }
+}
+
+private extension PhotoDetailViewController {
+    func configurePhotoImageView(url: URL) {
+        photoImageView.kf.indicatorType = .activity
+        if let indicator = photoImageView.kf.indicator?.view as? UIActivityIndicatorView {
+            indicator.color = .white
+            indicator.style = .medium
+        }
+        photoImageView.contentMode = .scaleAspectFit
+        photoImageView.clipsToBounds = true
+        photoImageView.layer.cornerRadius = 12
+        photoImageView.clipsToBounds = true
+        photoImageView.heightAnchor
+            .constraint(
+                equalTo: photoImageView.widthAnchor,
+                multiplier: reactor?.currentState.ratio ?? 1
+            )
+            .isActive = true
+
+        photoImageView.kf.setImage(
+            with: url,
+            options: [
+                .transition(.fade(0.3)),
+                .scaleFactor(UIScreen.main.scale),
+                .cacheSerializer(FormatIndicatedCacheSerializer.jpeg)
+            ]
+        )
     }
 }

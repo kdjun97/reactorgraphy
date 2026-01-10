@@ -8,13 +8,18 @@
 import ReactorKit
 import Domain
 import RxRelay
+import Foundation
 
 final public class PhotoDetailReactor: Reactor {
     public let initialState: State
     public var routeRelay = PublishRelay<Route>()
     
     public init(model: PhotosModel) {
-        self.initialState = State(model: model)
+        let ratio: CGFloat = CGFloat(model.height) / CGFloat(model.width)
+        self.initialState = State(
+            model: model,
+            ratio: ratio
+        )
         print("⭕ PhotoDetailReactor init!")
     }
     
@@ -26,6 +31,7 @@ final public class PhotoDetailReactor: Reactor {
     public struct State {
         let model: PhotosModel
         var isBookmarked: Bool = false
+        let ratio: CGFloat
     }
     
     public enum Action {
