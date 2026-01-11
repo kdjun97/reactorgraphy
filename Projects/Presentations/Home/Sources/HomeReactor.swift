@@ -6,9 +6,15 @@
 //
 
 import ReactorKit
+import Domain
 
 final class HomeReactor: Reactor {
-    init() {
+    private let photoUseCase: PhotoUseCase
+    
+    init(
+        photoUseCase: PhotoUseCase
+    ) {
+        self.photoUseCase = photoUseCase
         print("⭕ HomeReactor init!")
     }
 
@@ -19,7 +25,8 @@ final class HomeReactor: Reactor {
     let initialState: State = .init()
     
     struct State {
-        
+        var bookmarkItems: [BookmarkCardItem] = []
+        var latestImageItems: [LatestImageItem] = []
     }
     
     enum Action {
@@ -27,18 +34,35 @@ final class HomeReactor: Reactor {
     }
     
     enum Mutation {
-        
+        case setBookmarkItem([BookmarkCardItem])
+        case setLatestImageItem([LatestImageItem])
     }
     
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .viewDidLoad:
-            return .empty()
+            let items: [BookmarkCardItem] = (0..<5).map { _ in
+                BookmarkCardItem.init()
+            }
+            let latestImageItems: [LatestImageItem] = (0..<10).map { _ in
+                LatestImageItem.init()
+            }
+            return .merge([
+                .just(.setBookmarkItem(items)),
+                .just(.setLatestImageItem(latestImageItems))
+            ])
         }
     }
     
     func reduce(state: State, mutation: Mutation) -> State {
         var newState = state
-        return newState
+        switch mutation {
+        case .setBookmarkItem(let bookmarkItems):
+            newState.bookmarkItems = bookmarkItems
+            return newState
+        case .setLatestImageItem(let latestImageItems):
+            newState.latestImageItems = latestImageItems
+            return newState
+        }
     }
 }
