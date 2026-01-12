@@ -15,4 +15,8 @@ public struct PhotoUseCase {
     public func getRandomPhoto() async -> Result<PhotosModel, Error> {
         return await repositoryProtocol.getRandomPhoto()
     }
+    
+    public func getPhotoList(currentIndex: Int) async -> Result<[PhotosModel], Error> {
+        return await repositoryProtocol.getPhotoList(currentIndex: currentIndex)
+    }
 }

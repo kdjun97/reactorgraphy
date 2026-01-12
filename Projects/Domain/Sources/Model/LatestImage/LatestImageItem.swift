@@ -9,7 +9,9 @@ import Foundation
 
 public struct LatestImageItem: Hashable {
     public let uuid = UUID()
+    public let model: PhotosModel
     
-    public init() {
+    public init(model: PhotosModel) {
+        self.model = model
     }
 }
