@@ -15,8 +15,9 @@ final class CarouselCollectionView: UICollectionView {
     private var lastIndex: Int = -1
     
     init() {
-        super.init(frame: .zero, collectionViewLayout: UICollectionViewLayout())
-        collectionViewLayout = makeLayout()
+        let layout = UICollectionViewLayout()
+        super.init(frame: .zero, collectionViewLayout: layout)
+        setCollectionViewLayout(makeLayout(), animated: false)
         setupUI()
         registerCell()
     }

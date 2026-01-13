@@ -126,10 +126,10 @@ private extension RandomPhotoReactor {
                 switch result {
                 case .success(let model):
                     observer.onNext(.setPhotoModelToIndex(model, index))
+                    observer.onCompleted()
                 case .failure(let error):
-                    observer.onError(error)
+                    observer.onError(error) // 일단 Error에 대한 UI처리나 아무것도 고려 없이, onError를 던지게 구현. 추후는 error UI 핸들링
                 }
-                observer.onCompleted()
             }
             return Disposables.create { task.cancel() }
         }
