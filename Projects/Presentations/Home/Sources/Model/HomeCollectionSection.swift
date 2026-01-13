@@ -7,12 +7,10 @@
 
 import Domain
 
-enum HomeCollectionSection: Int {
+enum BookmarkSection: Int {
     case bookmark = 0
-    case latestImage = 1
 }
 
-enum HomeCollectionItem: Hashable {
+enum BookmarkCollectionItem: Hashable {
     case bookmark(BookmarkCardItem)
-    case latestImage(LatestImageItem)
 }

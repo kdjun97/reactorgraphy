@@ -13,7 +13,7 @@ import DesignSystem
 
 final class HomeViewController: UIViewController, View {
     var disposeBag = DisposeBag()
-    private var dataSource: UICollectionViewDiffableDataSource<HomeCollectionSection, HomeCollectionItem>?
+    private var bookmarkDataSource: UICollectionViewDiffableDataSource<BookmarkSection, BookmarkCollectionItem>?
     
     init(reactor: HomeReactor) {
         defer { self.reactor = reactor }
@@ -30,7 +30,7 @@ final class HomeViewController: UIViewController, View {
     }
     
     private let navigationBar: RNavigationBar = .init(style: .logo)
-    private lazy var collectionView = HomeCollectionView()
+    private lazy var bookmarkCollectionView = BookmarkCollectionView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,51 +56,43 @@ final class HomeViewController: UIViewController, View {
             })
             .disposed(by: disposeBag)
         
-        reactor.state
-            .map { $0.latestImageItems }
-            .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] items in
-                guard let self = self else { return }
-                self.updateSnapshot(
-                    for: .latestImage,
-                    items: items.map { .latestImage($0) }
-                )
-            })
-            .disposed(by: disposeBag)
+//        reactor.state
+//            .map { $0.latestImageItems }
+//            .distinctUntilChanged()
+//            .observe(on: MainScheduler.instance)
+//            .subscribe(onNext: { [weak self] items in
+//                guard let self = self else { return }
+//                self.updateSnapshot(
+//                    for: .latestImage,
+//                    items: items.map { .latestImage($0) }
+//                )
+//            })
+//            .disposed(by: disposeBag)
     }
 }
 
 private extension HomeViewController {
     func makeDataSource(_ reactor: HomeReactor) {
-        dataSource = UICollectionViewDiffableDataSource(
-            collectionView: collectionView
+        bookmarkDataSource = UICollectionViewDiffableDataSource(
+            collectionView: bookmarkCollectionView
         ) { [weak reactor] collectionView, indexPath, item in
             guard let reactor = reactor else { return UICollectionViewCell() }
             
             switch item {
-            case .bookmark(let bookmarkCardItems):
+            case .bookmark(let bookmarkCardItem):
                 guard let cell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: HomeBookmarkCell.reuseID,
                     for: indexPath
                 ) as? HomeBookmarkCell else { return UICollectionViewCell() }
                 
                 cell.configure(
-                    width: bookmarkCardItems.width
+                    width: bookmarkCardItem.width
                 )
-                return cell
-            case .latestImage(let latestImageItems):
-                guard let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: LatestImageCell.reuseID,
-                    for: indexPath
-                ) as? LatestImageCell else { return UICollectionViewCell() }
-                
-                cell.configure()
                 return cell
             }
         }
         
-        dataSource?.supplementaryViewProvider = { collectionView, kind, indexPath in
+        bookmarkDataSource?.supplementaryViewProvider = { collectionView, kind, indexPath in
             guard kind == UICollectionView.elementKindSectionHeader else { return nil }
             
             guard let header = collectionView.dequeueReusableSupplementaryView(
@@ -109,12 +101,10 @@ private extension HomeViewController {
                 for: indexPath
             ) as? HomeSectionHeaderView else { return nil }
             
-            let section = HomeCollectionSection(rawValue: indexPath.section)
+            let section = BookmarkSection(rawValue: indexPath.section)
             switch section {
             case .bookmark:
                 header.configure(title: "북마크")
-            case .latestImage:
-                header.configure(title: "최근 이미지")
             default:
                 break
             }
@@ -124,19 +114,19 @@ private extension HomeViewController {
     }
     
     func sectionInitialize() {
-        var initSection = NSDiffableDataSourceSnapshot<HomeCollectionSection, HomeCollectionItem>()
-        initSection.appendSections([.bookmark, .latestImage])
-        dataSource?.apply(initSection, animatingDifferences: false)
+        var initSection = NSDiffableDataSourceSnapshot<BookmarkSection, BookmarkCollectionItem>()
+        initSection.appendSections([.bookmark])
+        bookmarkDataSource?.apply(initSection, animatingDifferences: false)
     }
     
     func updateSnapshot(
-        for section: HomeCollectionSection,
-        items: [HomeCollectionItem]
+        for section: BookmarkSection,
+        items: [BookmarkCollectionItem]
     ) {
-        var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<HomeCollectionItem>()
+        var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<BookmarkCollectionItem>()
         sectionSnapshot.append(items)
         
-        dataSource?.apply(
+        bookmarkDataSource?.apply(
             sectionSnapshot,
             to: section,
             animatingDifferences: true
@@ -157,9 +147,9 @@ private extension HomeViewController {
             $0.leading.trailing.equalToSuperview()
         }
         
-        view.addSubview(collectionView)
+        view.addSubview(bookmarkCollectionView)
         
-        collectionView.snp.makeConstraints {
+        bookmarkCollectionView.snp.makeConstraints {
             $0.top.equalTo(navigationBar.snp.bottom).offset(20)
             $0.leading.trailing.equalToSuperview()
             $0.bottom.equalToSuperview()

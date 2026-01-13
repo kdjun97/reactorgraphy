@@ -27,10 +27,12 @@ final class HomeReactor: Reactor {
     struct State {
         var bookmarkItems: [BookmarkCardItem] = []
         var latestImageItems: [LatestImageItem] = []
+        var currentIndex: Int = 1
     }
     
     enum Action {
         case viewDidLoad
+        case fetchPhotoList
     }
     
     enum Mutation {
@@ -44,13 +46,13 @@ final class HomeReactor: Reactor {
             let items: [BookmarkCardItem] = (0..<5).map { _ in
                 BookmarkCardItem.init()
             }
-            let latestImageItems: [LatestImageItem] = (0..<10).map { _ in
-                LatestImageItem.init()
-            }
             return .merge([
                 .just(.setBookmarkItem(items)),
-                .just(.setLatestImageItem(latestImageItems))
+                fetchPhotoList(currentIndex: 1)
             ])
+        case .fetchPhotoList:
+            let index = currentState.currentIndex + 1
+            return fetchPhotoList(currentIndex: index)
         }
     }
     
@@ -61,8 +63,56 @@ final class HomeReactor: Reactor {
             newState.bookmarkItems = bookmarkItems
             return newState
         case .setLatestImageItem(let latestImageItems):
-            newState.latestImageItems = latestImageItems
+            if currentState.latestImageItems.isEmpty {
+                newState.latestImageItems = latestImageItems
+                return newState
+            }
+            let isLastPage = compareLastPage(
+                storedList: currentState.latestImageItems,
+                receivedList: latestImageItems
+            )
+            
+            if !isLastPage {
+                newState.currentIndex = currentState.currentIndex + 1
+                newState.latestImageItems += latestImageItems
+            }
+            
             return newState
+        }
+    }
+}
+
+private extension HomeReactor {
+    func fetchPhotoList(currentIndex: Int) -> Observable<Mutation> {
+        return Observable.create { [weak self] observer in
+            let task = Task {
+                guard let self = self else { return }
+                let result = await self.photoUseCase.getPhotoList(currentIndex: currentIndex)
+                
+                switch result {
+                case .success(let models):
+                    let latestImages = models.map { LatestImageItem(model: $0) }
+                    observer.onNext(.setLatestImageItem(latestImages))
+                    observer.onCompleted()
+                case .failure(let error):
+                    observer.onError(error) // 일단 Error에 대한 UI처리나 아무것도 고려 없이, onError를 던지게 구현. 추후는 error UI 핸들링
+                }
+            }
+            return Disposables.create { task.cancel() }
+        }
+    }
+}
+
+private extension HomeReactor {
+    func compareLastPage(
+        storedList: [LatestImageItem],
+        receivedList: [LatestImageItem]
+    ) -> Bool {
+        if let receivedPhotosLastIndexId = receivedList.last?.uuid,
+           let storedPhotosLastIndexId = storedList.last?.uuid {
+            return (receivedPhotosLastIndexId == storedPhotosLastIndexId)
+        } else {
+            return false
         }
     }
 }

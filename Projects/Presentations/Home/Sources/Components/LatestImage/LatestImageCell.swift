@@ -7,10 +7,12 @@
 
 import UIKit
 import SnapKit
+import Kingfisher
+import Domain
 
 final class LatestImageCell: UICollectionViewCell {
     static let reuseID: String = "LatestImageCell"
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -23,14 +25,16 @@ final class LatestImageCell: UICollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
+        latestImageView.kf.cancelDownloadTask()
+        latestImageView.image = nil
     }
     
-    private let latestImageView: UIView = {
-        let uiView = UIView()
-        uiView.layer.cornerRadius = 12
-        uiView.backgroundColor = .gray
-        
-        return uiView
+    private let latestImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        imageView.layer.cornerRadius = 12
+        return imageView
     }()
 }
 
@@ -49,7 +53,16 @@ private extension LatestImageCell {
 }
 
 extension LatestImageCell {
-    func configure() {
-        // TODO: configure Cell
+    func configure(item: LatestImageItem) {
+        guard let url = URL(string: item.model.urls.small) else { return }
+        
+        latestImageView.kf.setImage(
+            with: url,
+            placeholder: UIImage(systemName: "photo"),
+            options: [
+                .transition(.fade(0.2)),
+                .cacheOriginalImage
+            ]
+        )
     }
 }

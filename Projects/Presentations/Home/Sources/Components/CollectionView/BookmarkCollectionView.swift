@@ -1,5 +1,5 @@
 //
-//  HomeCollectionView.swift
+//  BookmarkCollectionView.swift
 //  Home
 //
 //  Created by 김동준 on 1/10/26
@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-final class HomeCollectionView: UICollectionView {
+final class BookmarkCollectionView: UICollectionView {
     init() {
         super.init(frame: .zero, collectionViewLayout: UICollectionViewLayout())
         collectionViewLayout = makeLayout()
@@ -21,7 +21,7 @@ final class HomeCollectionView: UICollectionView {
     }
 }
 
-private extension HomeCollectionView {
+private extension BookmarkCollectionView {
     func setupUI() {
         backgroundColor = .systemBackground
         showsHorizontalScrollIndicator = false
@@ -34,10 +34,6 @@ private extension HomeCollectionView {
             forCellWithReuseIdentifier: HomeBookmarkCell.reuseID
         )
         register(
-            LatestImageCell.self,
-            forCellWithReuseIdentifier: LatestImageCell.reuseID
-        )
-        register(
             HomeSectionHeaderView.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
             withReuseIdentifier: HomeSectionHeaderView.reuseID
@@ -45,16 +41,14 @@ private extension HomeCollectionView {
     }
 }
 
-private extension HomeCollectionView {
+private extension BookmarkCollectionView {
     func makeLayout() -> UICollectionViewCompositionalLayout {
         return UICollectionViewCompositionalLayout { [weak self] sectionIndex, _ in
             guard let self = self,
-                  let sectionCase = HomeCollectionSection(rawValue: sectionIndex) else { return nil }
+                  let sectionCase = BookmarkSection(rawValue: sectionIndex) else { return nil }
             switch sectionCase {
             case .bookmark:
                 return makeBookmarkSection()
-            case .latestImage:
-                return makeLatestImageSection()
             }
         }
     }
@@ -91,41 +85,9 @@ private extension HomeCollectionView {
         
         return section
     }
-    
-    func makeLatestImageSection() -> NSCollectionLayoutSection {
-        // TODO: bookmarkSection 개발 완료 후, 수정 할 것
-        let randomWidthRatio = CGFloat.random(in: 0.4...0.7)
-        let itemSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(0.5),
-            heightDimension: .fractionalHeight(1.0)
-        )
-        
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        
-        let groupSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(228)
-        )
-        
-        let group = NSCollectionLayoutGroup.horizontal(
-            layoutSize: groupSize,
-            subitems: [item]
-        )
-        
-        let section = NSCollectionLayoutSection(group: group)
-        section.boundarySupplementaryItems = [makeSectionHeader()]
-        section.contentInsets = NSDirectionalEdgeInsets(
-            top: 0,
-            leading: 20,
-            bottom: 0,
-            trailing: 20
-        )
-        
-        return section
-    }
 }
 
-private extension HomeCollectionView {
+private extension BookmarkCollectionView {
     func makeSectionHeader() -> NSCollectionLayoutBoundarySupplementaryItem {
         let size = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
