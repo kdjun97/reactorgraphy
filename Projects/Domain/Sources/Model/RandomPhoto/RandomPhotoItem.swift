@@ -26,6 +26,15 @@ public struct PhotosModel: Hashable {
     public let urls: PhotoUrl
     public let username: String
     
+    public var aspectRatio: CGFloat {
+        guard height > 0 else { return 1.0 }
+        return CGFloat(width) / CGFloat(height)
+    }
+    
+    public func calculatedHeight(forWidth width: CGFloat) -> CGFloat {
+        return width / aspectRatio
+    }
+    
     public init(
         id: String = "",
         width: Int = 0,

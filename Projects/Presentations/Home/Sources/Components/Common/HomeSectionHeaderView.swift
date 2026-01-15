@@ -9,7 +9,8 @@ import UIKit
 import SnapKit
 
 final class HomeSectionHeaderView: UICollectionReusableView {
-    static let reuseID = "SectionHeaderView"
+    static let reuseID = "BookmarkSectionHeader"
+    static let waterfallReuseID = "WaterfallSectionHeader"
     
     private let titleLabel: UILabel = {
         let label = UILabel()

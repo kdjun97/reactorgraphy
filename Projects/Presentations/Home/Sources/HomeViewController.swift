@@ -14,6 +14,7 @@ import DesignSystem
 final class HomeViewController: UIViewController, View {
     var disposeBag = DisposeBag()
     private var bookmarkDataSource: UICollectionViewDiffableDataSource<BookmarkSection, BookmarkCollectionItem>?
+    var waterfallDataSource: UICollectionViewDiffableDataSource<WaterfallSection, WaterfallCollectionItem>?
     
     init(reactor: HomeReactor) {
         defer { self.reactor = reactor }
@@ -32,16 +33,23 @@ final class HomeViewController: UIViewController, View {
     private let navigationBar: RNavigationBar = .init(style: .logo)
     private lazy var bookmarkCollectionView = BookmarkCollectionView()
     
+    private lazy var waterfallCollectionView: WaterfallCollectionView = {
+        let collectionView = WaterfallCollectionView()
+        collectionView.setupLayoutDelegate(self)
+        
+        return collectionView
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupLayout()
-        sectionInitialize()
         reactor?.action.onNext(.viewDidLoad)
     }
     
     func bind(reactor: HomeReactor) {
-        makeDataSource(reactor)
+        makeBookmarkDataSource(reactor)
+        makeWaterfallDataSource(reactor)
         
         reactor.state
             .map { $0.bookmarkItems }
@@ -49,30 +57,31 @@ final class HomeViewController: UIViewController, View {
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] items in
                 guard let self = self else { return }
-                self.updateSnapshot(
+                self.updateBookmarkSnapshot(
                     for: .bookmark,
                     items: items.map { .bookmark($0) }
                 )
             })
             .disposed(by: disposeBag)
         
-//        reactor.state
-//            .map { $0.latestImageItems }
-//            .distinctUntilChanged()
-//            .observe(on: MainScheduler.instance)
-//            .subscribe(onNext: { [weak self] items in
-//                guard let self = self else { return }
-//                self.updateSnapshot(
-//                    for: .latestImage,
-//                    items: items.map { .latestImage($0) }
-//                )
-//            })
-//            .disposed(by: disposeBag)
+        reactor.state
+            .map { $0.latestImageItems }
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] items in
+                guard let self = self else { return }
+                self.updateWaterfallSnapshot(
+                    for: .waterfall,
+                    items: items.map { .waterfall($0) }
+                )
+                self.waterfallCollectionView.collectionViewLayout.invalidateLayout()
+            })
+            .disposed(by: disposeBag)
     }
 }
 
 private extension HomeViewController {
-    func makeDataSource(_ reactor: HomeReactor) {
+    func makeBookmarkDataSource(_ reactor: HomeReactor) {
         bookmarkDataSource = UICollectionViewDiffableDataSource(
             collectionView: bookmarkCollectionView
         ) { [weak reactor] collectionView, indexPath, item in
@@ -113,13 +122,46 @@ private extension HomeViewController {
         }
     }
     
-    func sectionInitialize() {
-        var initSection = NSDiffableDataSourceSnapshot<BookmarkSection, BookmarkCollectionItem>()
-        initSection.appendSections([.bookmark])
-        bookmarkDataSource?.apply(initSection, animatingDifferences: false)
+    func makeWaterfallDataSource(_ reactor: HomeReactor) {
+        waterfallDataSource = UICollectionViewDiffableDataSource(
+            collectionView: waterfallCollectionView
+        ) { [weak reactor] collectionView, indexPath, item in
+            guard let reactor = reactor else { return UICollectionViewCell() }
+            
+            switch item {
+            case .waterfall(let item):
+                guard let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: LatestImageCell.reuseID,
+                    for: indexPath
+                ) as? LatestImageCell else { return UICollectionViewCell() }
+                
+                cell.configure(item: item)
+                return cell
+            }
+        }
+        
+        waterfallDataSource?.supplementaryViewProvider = { collectionView, kind, indexPath in
+            guard kind == UICollectionView.elementKindSectionHeader else { return nil }
+            
+            guard let header = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: HomeSectionHeaderView.waterfallReuseID,
+                for: indexPath
+            ) as? HomeSectionHeaderView else { return nil }
+            
+            let section = WaterfallSection(rawValue: indexPath.section)
+            switch section {
+            case .waterfall:
+                header.configure(title: "최신 이미지")
+            default:
+                break
+            }
+            
+            return header
+        }
     }
     
-    func updateSnapshot(
+    func updateBookmarkSnapshot(
         for section: BookmarkSection,
         items: [BookmarkCollectionItem]
     ) {
@@ -130,6 +172,20 @@ private extension HomeViewController {
             sectionSnapshot,
             to: section,
             animatingDifferences: true
+        )
+    }
+    
+    func updateWaterfallSnapshot(
+        for section: WaterfallSection,
+        items: [WaterfallCollectionItem]
+    ) {
+        var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<WaterfallCollectionItem>()
+        sectionSnapshot.append(items)
+        
+        waterfallDataSource?.apply(
+            sectionSnapshot,
+            to: section,
+            animatingDifferences: false
         )
     }
 }
@@ -151,6 +207,14 @@ private extension HomeViewController {
         
         bookmarkCollectionView.snp.makeConstraints {
             $0.top.equalTo(navigationBar.snp.bottom).offset(20)
+            $0.leading.trailing.equalToSuperview()
+            $0.height.equalTo(172)
+        }
+        
+        view.addSubview(waterfallCollectionView)
+        
+        waterfallCollectionView.snp.makeConstraints {
+            $0.top.equalTo(bookmarkCollectionView.snp.bottom).offset(12)
             $0.leading.trailing.equalToSuperview()
             $0.bottom.equalToSuperview()
         }

@@ -47,7 +47,7 @@ private extension LatestImageCell {
         contentView.addSubview(latestImageView)
         
         latestImageView.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(16)
+            $0.edges.equalToSuperview()
         }
     }
 }

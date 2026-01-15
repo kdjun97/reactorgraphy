@@ -14,3 +14,11 @@ enum BookmarkSection: Int {
 enum BookmarkCollectionItem: Hashable {
     case bookmark(BookmarkCardItem)
 }
+
+enum WaterfallSection: Int {
+    case waterfall = 0
+}
+
+enum WaterfallCollectionItem: Hashable {
+    case waterfall(LatestImageItem)
+}
