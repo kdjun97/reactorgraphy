@@ -13,7 +13,7 @@ import DesignSystem
 
 final class HomeViewController: UIViewController, View {
     var disposeBag = DisposeBag()
-    private var bookmarkDataSource: UICollectionViewDiffableDataSource<BookmarkSection, BookmarkCollectionItem>?
+    var bookmarkDataSource: UICollectionViewDiffableDataSource<BookmarkSection, BookmarkCollectionItem>?
     var waterfallDataSource: UICollectionViewDiffableDataSource<WaterfallSection, WaterfallCollectionItem>?
     
     init(reactor: HomeReactor) {
@@ -31,7 +31,12 @@ final class HomeViewController: UIViewController, View {
     }
     
     private let navigationBar: RNavigationBar = .init(style: .logo)
-    private lazy var bookmarkCollectionView = BookmarkCollectionView()
+    private lazy var bookmarkCollectionView: BookmarkCollectionView = {
+        let collectionView = BookmarkCollectionView()
+        collectionView.setupLayoutDeleagte(self)
+        
+        return collectionView
+    }()
     
     private lazy var waterfallCollectionView: WaterfallCollectionView = {
         let collectionView = WaterfallCollectionView()
@@ -61,6 +66,7 @@ final class HomeViewController: UIViewController, View {
                     for: .bookmark,
                     items: items.map { .bookmark($0) }
                 )
+                self.bookmarkCollectionView.collectionViewLayout.invalidateLayout()
             })
             .disposed(by: disposeBag)
         

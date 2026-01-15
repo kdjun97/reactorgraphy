@@ -22,3 +22,13 @@ enum WaterfallSection: Int {
 enum WaterfallCollectionItem: Hashable {
     case waterfall(LatestImageItem)
 }
+
+enum HomeCollectionSection: Int {
+    case bookmark = 0
+    case waterfall = 1
+}
+
+enum HomeCollectionItem: Hashable {
+    case bookmark(BookmarkCardItem)
+    case waterfall(LatestImageItem)
+}
