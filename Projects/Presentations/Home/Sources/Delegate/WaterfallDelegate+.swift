@@ -1,25 +1,23 @@
 //
-//  WaterfallLayoutDelegate+.swift
+//  WaterfallDelegate+.swift
 //  Home
 //
-//  Created by 김동준 on 1/15/26
+//  Created by 김동준 on 1/16/26
 //
 
 import UIKit
 
-extension HomeViewController: WaterfallLayoutDelegate {
+extension HomeViewController: WaterfallDelegate {
     func heightForItem(at indexPath: IndexPath, width: CGFloat) -> CGFloat {
-        guard let item = waterfallDataSource?.itemIdentifier(for: indexPath) else {
+        guard let item = dataSource?.itemIdentifier(for: indexPath) else {
             return 180
         }
         
         switch item {
         case .waterfall(let photo):
             return photo.model.calculatedHeight(forWidth: width)
+        default:
+            return 0
         }
-    }
-    
-    func heightForHeader() -> CGFloat {
-        return 44
     }
 }
