@@ -7,22 +7,6 @@
 
 import Domain
 
-enum BookmarkSection: Int {
-    case bookmark = 0
-}
-
-enum BookmarkCollectionItem: Hashable {
-    case bookmark(BookmarkCardItem)
-}
-
-enum WaterfallSection: Int {
-    case waterfall = 0
-}
-
-enum WaterfallCollectionItem: Hashable {
-    case waterfall(LatestImageItem)
-}
-
 enum HomeCollectionSection: Int {
     case bookmark = 0
     case waterfall = 1
