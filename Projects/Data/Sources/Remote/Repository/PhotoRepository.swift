@@ -27,4 +27,16 @@ public class PhotoRepository: PhotoRepositoryProtocol {
             return .failure(error)
         }
     }
+    
+    public func getPhotoList(currentIndex: Int) async -> Result<[PhotosModel], Error> {
+        do {
+            let queryParameters = PhotoRequest(page: String(currentIndex))
+            let endPoint = EndPoint<[PhotoItem?]>.getPhotoList(queryParameters: queryParameters)
+            let response = try await apiService.call(endPoint)
+            
+            return .success(response.compactMap { $0?.toDomain() })
+        } catch {
+            return .failure(error)
+        }
+    }
 }

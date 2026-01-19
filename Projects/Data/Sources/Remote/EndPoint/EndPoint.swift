@@ -31,4 +31,8 @@ extension EndPoint {
     static func getRandomPhoto() -> EndPoint<T> {
         return EndPoint(path: .randomPhoto, method: .GET)
     }
+    
+    static func getPhotoList(queryParameters: PhotoRequest) -> EndPoint<T> {
+        return EndPoint(path: .photos, method: .GET, queryParameters: queryParameters)
+    }
 }

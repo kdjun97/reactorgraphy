@@ -7,6 +7,7 @@
 
 import Base
 import UIKit
+import DI
 
 public final class HomeCoordinator: BaseCoordinator {
     public let navigationController: BaseNavigationController
@@ -22,7 +23,8 @@ public final class HomeCoordinator: BaseCoordinator {
     }
     
     public override func start() {
-        let homeViewController = HomeViewController()
+        let reactor = HomeReactor(photoUseCase: DIContainer.shared.resolve())
+        let homeViewController = HomeViewController(reactor: reactor)
         navigationController.viewControllers = [homeViewController]
     }
 }

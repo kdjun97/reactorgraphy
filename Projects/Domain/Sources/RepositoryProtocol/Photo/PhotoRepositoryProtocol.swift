@@ -7,4 +7,5 @@
 
 public protocol PhotoRepositoryProtocol {
     func getRandomPhoto() async -> Result<PhotosModel, Error>
+    func getPhotoList(currentIndex: Int) async -> Result<[PhotosModel], Error>
 }

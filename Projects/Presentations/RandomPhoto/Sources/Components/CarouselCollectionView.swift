@@ -15,8 +15,9 @@ final class CarouselCollectionView: UICollectionView {
     private var lastIndex: Int = -1
     
     init() {
-        super.init(frame: .zero, collectionViewLayout: UICollectionViewLayout())
-        collectionViewLayout = makeFlowLayout()
+        let layout = UICollectionViewLayout()
+        super.init(frame: .zero, collectionViewLayout: layout)
+        setCollectionViewLayout(makeLayout(), animated: false)
         setupUI()
         registerCell()
     }
@@ -44,7 +45,7 @@ private extension CarouselCollectionView {
 }
 
 private extension CarouselCollectionView {
-    func makeFlowLayout() -> UICollectionViewLayout {
+    func makeLayout() -> UICollectionViewLayout {
         let itemSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
             heightDimension: .fractionalHeight(1.0)
