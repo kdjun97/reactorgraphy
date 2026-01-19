@@ -7,16 +7,11 @@
 
 import UIKit
 
-protocol BookmarkDelegate: AnyObject {
-    func widthForItem(at indexPath: IndexPath) -> CGFloat
-}
-
 protocol WaterfallDelegate: AnyObject {
     func heightForItem(at indexPath: IndexPath, width: CGFloat) -> CGFloat
 }
 
 final class HomeCollectionLayout: UICollectionViewLayout {
-    weak var bookmarkDelegate: BookmarkDelegate?
     weak var waterfallDelegate: WaterfallDelegate?
     
     private var attributes: [UICollectionViewLayoutAttributes] = []
@@ -94,7 +89,7 @@ private extension HomeCollectionLayout {
         headerAttributes.frame = CGRect(
             x: hPadding,
             y: startY,
-            width: collectionView.bounds.width, // TODO: width 조절해보기 필요. 지금은 풀로 적용
+            width: collectionView.bounds.width,
             height: headerHeight
         )
         attributes.append(headerAttributes)
@@ -102,30 +97,18 @@ private extension HomeCollectionLayout {
         let sectionCount = collectionView.numberOfSections
         guard sectionCount > 0 else { return 0 }
         
-        var xOffsets: CGFloat = hPadding
-        let yOffsets = startY + headerHeight
-        let itemHeight: CGFloat = 128
-        let itemSpacing: CGFloat = 10
+        let indexPath = IndexPath(item: 0, section: section)
         
-        let itemCount = collectionView.numberOfItems(inSection: section)
+        let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
+        attributes.frame = CGRect(
+            x: 0,
+            y: startY + headerHeight,
+            width: collectionView.bounds.width,
+            height: 128
+        )
+        self.attributes.append(attributes)
         
-        for item in 0..<itemCount {
-            let indexPath = IndexPath(item: item, section: section)
-            let itemWidth = bookmarkDelegate?.widthForItem(at: indexPath) ?? 120
-            
-            let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
-            attributes.frame = CGRect(
-                x: xOffsets,
-                y: yOffsets,
-                width: itemWidth,
-                height: itemHeight
-            )
-            self.attributes.append(attributes)
-            
-            xOffsets += itemWidth + itemSpacing
-        }
-        
-        return yOffsets + itemHeight
+        return startY + headerHeight + 128
     }
 }
 

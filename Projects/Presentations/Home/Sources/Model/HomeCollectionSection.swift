@@ -13,6 +13,6 @@ enum HomeCollectionSection: Int {
 }
 
 enum HomeCollectionItem: Hashable {
-    case bookmark(BookmarkCardItem)
+    case bookmarkRow([BookmarkCardItem])
     case waterfall(LatestImageItem)
 }

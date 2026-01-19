@@ -29,8 +29,8 @@ private extension HomeCollectionView {
     
     func registerCell() {
         register(
-            HomeBookmarkCell.self,
-            forCellWithReuseIdentifier: HomeBookmarkCell.reuseID
+            HomeBookmarkRowCell.self,
+            forCellWithReuseIdentifier: HomeBookmarkRowCell.reuseID
         )
         register(
             LatestImageCell.self,

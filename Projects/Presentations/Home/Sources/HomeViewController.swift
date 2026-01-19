@@ -32,7 +32,6 @@ final class HomeViewController: UIViewController, View {
     private let navigationBar: RNavigationBar = .init(style: .logo)
     private lazy var collectionView: HomeCollectionView = {
         let collectionView = HomeCollectionView()
-        collectionView.homeCollectionViewLayout.bookmarkDelegate = self
         collectionView.homeCollectionViewLayout.waterfallDelegate = self
         
         return collectionView
@@ -76,13 +75,13 @@ private extension HomeViewController {
             guard let self = self else { return UICollectionViewCell() }
             
             switch item {
-            case .bookmark(let card):
+            case .bookmarkRow(let cardRowItems):
                 guard let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: HomeBookmarkCell.reuseID,
+                    withReuseIdentifier: HomeBookmarkRowCell.reuseID,
                     for: indexPath
-                ) as? HomeBookmarkCell else { return UICollectionViewCell() }
+                ) as? HomeBookmarkRowCell else { return UICollectionViewCell() }
                 
-                cell.configure(width: card.width)
+                cell.configure(items: cardRowItems)
                 return cell
             case .waterfall(let photo):
                 guard let cell = collectionView.dequeueReusableCell(
@@ -126,10 +125,12 @@ private extension HomeViewController {
         
         snapshot.appendSections([.bookmark, .waterfall])
         
-        snapshot.appendItems(
-            bookmarks.map { .bookmark($0) },
-            toSection: .bookmark
-        )
+        if !bookmarks.isEmpty {
+            snapshot.appendItems(
+                [.bookmarkRow(bookmarks)],
+                toSection: .bookmark
+            )
+        }
         
         snapshot.appendItems(
             waterfalls.map { .waterfall($0) },
