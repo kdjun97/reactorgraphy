@@ -33,8 +33,8 @@ private extension HomeCollectionView {
             forCellWithReuseIdentifier: HomeBookmarkRowCell.reuseID
         )
         register(
-            LatestImageCell.self,
-            forCellWithReuseIdentifier: LatestImageCell.reuseID
+            WaterfallCell.self,
+            forCellWithReuseIdentifier: WaterfallCell.reuseID
         )
         register(
             HomeSectionHeaderView.self,

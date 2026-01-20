@@ -7,11 +7,12 @@
 
 import ReactorKit
 import Domain
+import RxRelay
 
-final class HomeReactor: Reactor {
+final public class HomeReactor: Reactor {
     private let photoUseCase: PhotoUseCase
     
-    init(
+    public init(
         photoUseCase: PhotoUseCase
     ) {
         self.photoUseCase = photoUseCase
@@ -22,25 +23,34 @@ final class HomeReactor: Reactor {
         print("❎ PhotoDetailReactor deinit!")
     }
     
-    let initialState: State = .init()
+    public let initialState: State = .init()
+    public var routeRelay = PublishRelay<Route>()
     
-    struct State {
+    public struct State {
         var bookmarkItems: [BookmarkCardItem] = []
-        var latestImageItems: [LatestImageItem] = []
+        var waterfallItems: [WaterfallItem] = []
         var currentIndex: Int = 1
+        var isLoading: Bool = false
     }
     
-    enum Action {
+    public enum Route {
+        case photoDetail(PhotosModel)
+    }
+    
+    public enum Action {
         case viewDidLoad
         case fetchPhotoList
+        case loadNextPage
+        case didPhotoTapped(HomeCollectionItem)
     }
     
-    enum Mutation {
+    public enum Mutation {
         case setBookmarkItem([BookmarkCardItem])
-        case setLatestImageItem([LatestImageItem])
+        case setWaterfallItem([WaterfallItem])
+        case setLoading(Bool)
     }
     
-    func mutate(action: Action) -> Observable<Mutation> {
+    public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .viewDidLoad:
             let items: [BookmarkCardItem] = (0..<5).map { _ in
@@ -53,30 +63,48 @@ final class HomeReactor: Reactor {
         case .fetchPhotoList:
             let index = currentState.currentIndex + 1
             return fetchPhotoList(currentIndex: index)
+        case .loadNextPage:
+            let nextIndex = currentState.currentIndex + 1
+            return .concat([
+                .just(.setLoading(true)),
+                fetchPhotoList(currentIndex: nextIndex),
+                .just(.setLoading(false))
+            ])
+        case .didPhotoTapped(let selectionItem):
+            switch selectionItem {
+            case .bookmarkRow:
+                return .empty()
+            case .waterfall(let item):
+                routeRelay.accept(.photoDetail(item.model))
+                return .empty()
+            }
         }
     }
     
-    func reduce(state: State, mutation: Mutation) -> State {
+    public func reduce(state: State, mutation: Mutation) -> State {
         var newState = state
         switch mutation {
         case .setBookmarkItem(let bookmarkItems):
             newState.bookmarkItems = bookmarkItems
             return newState
-        case .setLatestImageItem(let latestImageItems):
-            if currentState.latestImageItems.isEmpty {
-                newState.latestImageItems = latestImageItems
+        case .setWaterfallItem(let waterfallItems):
+            if state.waterfallItems.isEmpty {
+                newState.waterfallItems = waterfallItems
                 return newState
             }
             let isLastPage = compareLastPage(
-                storedList: currentState.latestImageItems,
-                receivedList: latestImageItems
+                storedList: state.waterfallItems,
+                receivedList: waterfallItems
             )
             
             if !isLastPage {
-                newState.currentIndex = currentState.currentIndex + 1
-                newState.latestImageItems += latestImageItems
+                newState.currentIndex = state.currentIndex + 1
+                newState.waterfallItems += waterfallItems
             }
             
+            return newState
+        case .setLoading(let value):
+            newState.isLoading = value
             return newState
         }
     }
@@ -88,15 +116,14 @@ private extension HomeReactor {
             let task = Task {
                 guard let self = self else { return }
                 let result = await self.photoUseCase.getPhotoList(currentIndex: currentIndex)
-                
                 switch result {
-                case .success(let models):
-                    let latestImages = models.map { LatestImageItem(model: $0) }
-                    observer.onNext(.setLatestImageItem(latestImages))
-                    observer.onCompleted()
-                case .failure(let error):
-                    observer.onError(error) // 일단 Error에 대한 UI처리나 아무것도 고려 없이, onError를 던지게 구현. 추후는 error UI 핸들링
+                case .success(let photoModels):
+                    let waterfallItems = photoModels.map { WaterfallItem(model: $0) }
+                    observer.onNext(.setWaterfallItem(waterfallItems))
+                case .failure:
+                    observer.onNext(.setLoading(false)) // MARK: 에러 처리는 하지 않았음.
                 }
+                observer.onCompleted()
             }
             return Disposables.create { task.cancel() }
         }
@@ -105,8 +132,8 @@ private extension HomeReactor {
 
 private extension HomeReactor {
     func compareLastPage(
-        storedList: [LatestImageItem],
-        receivedList: [LatestImageItem]
+        storedList: [WaterfallItem],
+        receivedList: [WaterfallItem]
     ) -> Bool {
         if let receivedPhotosLastIndexId = receivedList.last?.uuid,
            let storedPhotosLastIndexId = storedList.last?.uuid {

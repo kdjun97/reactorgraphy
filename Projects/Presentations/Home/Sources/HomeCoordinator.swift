@@ -11,9 +11,11 @@ import DI
 
 public final class HomeCoordinator: BaseCoordinator {
     public let navigationController: BaseNavigationController
+    public let reactor: HomeReactor
     
     public override init() {
         self.navigationController = BaseNavigationController()
+        self.reactor = HomeReactor(photoUseCase: DIContainer.shared.resolve())
         super.init()
         print("⭕ HomeCoordinator init!")
     }
@@ -23,7 +25,6 @@ public final class HomeCoordinator: BaseCoordinator {
     }
     
     public override func start() {
-        let reactor = HomeReactor(photoUseCase: DIContainer.shared.resolve())
         let homeViewController = HomeViewController(reactor: reactor)
         navigationController.viewControllers = [homeViewController]
     }

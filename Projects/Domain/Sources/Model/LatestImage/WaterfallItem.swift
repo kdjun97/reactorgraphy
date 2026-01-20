@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct LatestImageItem: Hashable {
+public struct WaterfallItem: Hashable {
     public let uuid = UUID()
     public let model: PhotosModel
     
