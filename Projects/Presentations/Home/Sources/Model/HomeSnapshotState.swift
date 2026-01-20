@@ -9,11 +9,11 @@ import Domain
 
 struct HomeSnapshotState: Equatable {
     let bookmarks: [BookmarkCardItem]
-    let waterfalls: [LatestImageItem]
+    let waterfalls: [WaterfallItem]
     
     init(
         bookmarks: [BookmarkCardItem],
-        waterfalls: [LatestImageItem]
+        waterfalls: [WaterfallItem]
     ) {
         self.bookmarks = bookmarks
         self.waterfalls = waterfalls

@@ -14,5 +14,5 @@ enum HomeCollectionSection: Int {
 
 enum HomeCollectionItem: Hashable {
     case bookmarkRow([BookmarkCardItem])
-    case waterfall(LatestImageItem)
+    case waterfall(WaterfallItem)
 }

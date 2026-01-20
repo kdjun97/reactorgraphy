@@ -51,7 +51,7 @@ final class HomeViewController: UIViewController, View {
             .map { state in
                 HomeSnapshotState(
                     bookmarks: state.bookmarkItems,
-                    waterfalls: state.latestImageItems
+                    waterfalls: state.waterfallItems
                 )
             }
             .distinctUntilChanged()
@@ -85,9 +85,9 @@ private extension HomeViewController {
                 return cell
             case .waterfall(let photo):
                 guard let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: LatestImageCell.reuseID,
+                    withReuseIdentifier: WaterfallCell.reuseID,
                     for: indexPath
-                ) as? LatestImageCell else { return UICollectionViewCell() }
+                ) as? WaterfallCell else { return UICollectionViewCell() }
                 
                 cell.configure(item: photo)
                 return cell
@@ -119,7 +119,7 @@ private extension HomeViewController {
     
     func updateSnapshot(
         bookmarks: [BookmarkCardItem],
-        waterfalls: [LatestImageItem]
+        waterfalls: [WaterfallItem]
     ) {
         var snapshot = NSDiffableDataSourceSnapshot<HomeCollectionSection, HomeCollectionItem>()
         

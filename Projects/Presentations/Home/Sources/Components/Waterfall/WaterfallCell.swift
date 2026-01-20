@@ -1,5 +1,5 @@
 //
-//  LatestImageCell.swift
+//  WaterfallCell.swift
 //  Home
 //
 //  Created by 김동준 on 1/11/26
@@ -10,8 +10,8 @@ import SnapKit
 import Kingfisher
 import Domain
 
-final class LatestImageCell: UICollectionViewCell {
-    static let reuseID: String = "LatestImageCell"
+final class WaterfallCell: UICollectionViewCell {
+    static let reuseID: String = "WaterfallCell"
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -25,11 +25,11 @@ final class LatestImageCell: UICollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        latestImageView.kf.cancelDownloadTask()
-        latestImageView.image = nil
+        imageView.kf.cancelDownloadTask()
+        imageView.image = nil
     }
     
-    private let latestImageView: UIImageView = {
+    private let imageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
@@ -38,27 +38,26 @@ final class LatestImageCell: UICollectionViewCell {
     }()
 }
 
-private extension LatestImageCell {
+private extension WaterfallCell {
     func setupUI() {
         contentView.backgroundColor = .orange.withAlphaComponent(0.1)
     }
     
     func setupLayout() {
-        contentView.addSubview(latestImageView)
+        contentView.addSubview(imageView)
         
-        latestImageView.snp.makeConstraints {
+        imageView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
     }
 }
 
-extension LatestImageCell {
-    func configure(item: LatestImageItem) {
+extension WaterfallCell {
+    func configure(item: WaterfallItem) {
         guard let url = URL(string: item.model.urls.small) else { return }
         
-        latestImageView.kf.setImage(
+        imageView.kf.setImage(
             with: url,
-            placeholder: UIImage(systemName: "photo"),
             options: [
                 .transition(.fade(0.2)),
                 .cacheOriginalImage
