@@ -10,6 +10,7 @@ import SnapKit
 import ReactorKit
 import Domain
 import DesignSystem
+import RxCocoa
 
 final class HomeViewController: UIViewController, View {
     var disposeBag = DisposeBag()
@@ -33,6 +34,7 @@ final class HomeViewController: UIViewController, View {
     private lazy var collectionView: HomeCollectionView = {
         let collectionView = HomeCollectionView()
         collectionView.homeCollectionViewLayout.waterfallDelegate = self
+        collectionView.delegate = self
         
         return collectionView
     }()
@@ -90,6 +92,18 @@ private extension HomeViewController {
                 ) as? WaterfallCell else { return UICollectionViewCell() }
                 
                 cell.configure(item: photo)
+                
+                cell.cellRelay
+                    .subscribe(onNext: { [weak self, weak cell] in
+                        guard let self = self,
+                              let cell = cell,
+                              let indexPath = self.collectionView.indexPath(for: cell),
+                              let item = self.dataSource?.itemIdentifier(for: indexPath) else { return }
+                        
+                        self.reactor?.action.onNext(.didPhotoTapped(item))
+                    })
+                    .disposed(by: cell.disposeBag)
+                
                 return cell
             }
         }
@@ -162,6 +176,23 @@ private extension HomeViewController {
             $0.top.equalTo(navigationBar.snp.bottom)
             $0.leading.trailing.equalToSuperview()
             $0.bottom.equalToSuperview()
+        }
+    }
+}
+
+extension HomeViewController: UICollectionViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let threshold: CGFloat = 50
+
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let frameHeight = scrollView.frame.height
+
+        guard contentHeight > frameHeight,
+              reactor?.currentState.isLoading == false else { return }
+
+        if offsetY + frameHeight >= contentHeight - threshold {
+            reactor?.action.onNext(.loadNextPage)
         }
     }
 }

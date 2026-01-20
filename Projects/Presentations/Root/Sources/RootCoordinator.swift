@@ -46,6 +46,16 @@ private extension RootCoordinator {
         addChild(homeCoordinator)
         homeCoordinator.start()
         
+        homeCoordinator.reactor.routeRelay
+            .subscribe(onNext: { [weak self] route in
+                guard let self = self else { return }
+                switch route {
+                case .photoDetail(let model):
+                    self.showPhotoDetail(model: model)
+                }
+            })
+            .disposed(by: disposeBag)
+        
         let randomPhotoCoordinator = RandomPhotoCoordinator()
         addChild(randomPhotoCoordinator)
         randomPhotoCoordinator.start()

@@ -9,14 +9,18 @@ import UIKit
 import SnapKit
 import Kingfisher
 import Domain
+import RxRelay
+import RxSwift
 
 final class WaterfallCell: UICollectionViewCell {
     static let reuseID: String = "WaterfallCell"
-
+    let cellRelay = PublishRelay<Void>()
+    var disposeBag = DisposeBag()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setupUI()
         setupLayout()
+        bind()
     }
     
     required init?(coder: NSCoder) {
@@ -27,7 +31,11 @@ final class WaterfallCell: UICollectionViewCell {
         super.prepareForReuse()
         imageView.kf.cancelDownloadTask()
         imageView.image = nil
+        disposeBag = DisposeBag()
+        bind()
     }
+    
+    private let buttonContainer: UIButton = .init()
     
     private let imageView: UIImageView = {
         let imageView = UIImageView()
@@ -36,17 +44,24 @@ final class WaterfallCell: UICollectionViewCell {
         imageView.layer.cornerRadius = 12
         return imageView
     }()
+    
+    private func bind() {
+        buttonContainer.rx.tap
+            .bind(to: cellRelay)
+            .disposed(by: disposeBag)
+    }
 }
 
 private extension WaterfallCell {
-    func setupUI() {
-        contentView.backgroundColor = .orange.withAlphaComponent(0.1)
-    }
-    
     func setupLayout() {
         contentView.addSubview(imageView)
+        contentView.addSubview(buttonContainer)
         
         imageView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+
+        buttonContainer.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
     }
@@ -56,6 +71,12 @@ extension WaterfallCell {
     func configure(item: WaterfallItem) {
         guard let url = URL(string: item.model.urls.small) else { return }
         
+        imageView.kf.indicatorType = .activity
+        if let indicator = imageView.kf.indicator?.view as? UIActivityIndicatorView {
+            indicator.color = .white
+            indicator.style = .medium
+        }
+
         imageView.kf.setImage(
             with: url,
             options: [
