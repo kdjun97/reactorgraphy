@@ -11,7 +11,7 @@ ReactorKit을 활용한 단방향 데이터 흐름과 구조 설계를 연습해
 - UI framework: UIKit  
 - Architecture: Clean Architecture  
 - State Management: ReactorKit, RxSwift, RxCocoa
-- Image Loading: Kingfhiser
+- Image Loading: Kingfisher
 - Layout: Snapkit
 
 ### Features
