@@ -1,0 +1,29 @@
+//
+//  KeyChainRepository.swift
+//  Data
+//
+//  Created by 김동준 on 1/5/26
+//
+
+import Domain
+
+public struct KeyChainRepository: KeyChainRepositoryProtocol {
+    private let keyChainStorage: KeyChainStorage
+    
+    public init(keyChainStorage: KeyChainStorage) {
+        self.keyChainStorage = keyChainStorage
+    }
+    
+    public func getAccessToken() -> String? {
+        return try? keyChainStorage.read(key: KeyChainStorageKeys.ACCESS_TOKEN, type: String.self)
+    }
+
+    public func setAccessToken(_ accessToken: String) -> Bool {
+        do {
+            try keyChainStorage.save(key: KeyChainStorageKeys.ACCESS_TOKEN, value: accessToken)
+            return true
+        } catch {
+            return false
+        }
+    }
+}
